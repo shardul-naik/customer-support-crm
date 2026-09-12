@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { X, User, Mail, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { X, User, Mail, MessageSquare, CheckCircle2, Trash2 } from 'lucide-react';
+import { deleteTicket } from '../services/api';
 
-export default function TicketDetailDrawer({ ticket, isOpen, onClose, onUpdateTicket }) {
+export default function TicketDetailDrawer({ ticket, isOpen, onClose, onUpdateTicket, onTicketUpdated }) {
     const [newNote, setNewNote] = useState('');
     const [status, setStatus] = useState(ticket?.status || 'Open');
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     if (!isOpen || !ticket) return null;
 
@@ -23,6 +25,21 @@ export default function TicketDetailDrawer({ ticket, isOpen, onClose, onUpdateTi
             alert('Failed to update ticket.');
         } finally {
             setIsUpdating(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm(`Delete ticket ${ticket.id}? This action cannot be undone.`)) return;
+
+        setIsDeleting(true);
+        try {
+            await deleteTicket(ticket.id);
+            await onTicketUpdated();
+            onClose();
+        } catch {
+            alert('Failed to delete ticket.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -136,6 +153,16 @@ export default function TicketDetailDrawer({ ticket, isOpen, onClose, onUpdateTi
                         >
                             <CheckCircle2 className="w-4 h-4" />
                             <span>{isUpdating ? 'Saving...' : 'Save Changes'}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="w-full flex items-center justify-center space-x-2 text-rose-600 hover:bg-rose-50 border border-rose-200 py-2 rounded-lg text-xs font-semibold transition disabled:opacity-50"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span>{isDeleting ? 'Deleting...' : 'Delete Ticket'}</span>
                         </button>
                     </form>
 

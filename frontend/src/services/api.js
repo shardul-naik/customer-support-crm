@@ -33,4 +33,8 @@ export const updateTicket = async (id, updateData) => {
     return response.data;
 };
 
+export const deleteTicket = async (id) => {
+    await api.delete('/api/tickets/' + id);
+};
+
 export default api;

@@ -105,6 +105,7 @@ export default function App() {
           setSelectedTicket(null);
         }}
         onUpdateTicket={handleUpdateTicket}
+        onTicketUpdated={fetchTickets}
       />
     </div>
   );

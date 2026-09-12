@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.database import engine, Base, get_db
 from app.models import TicketStatus
+import app.models as models
 from app.schemas import TicketCreate, TicketUpdate, TicketResponse
 import app.crud as crud
 
@@ -77,3 +78,21 @@ def update_ticket(
             detail=f"Ticket with ID '{ticket_id}' not found.",
         )
     return updated_ticket
+
+# 5. DELETE TICKET
+@app.delete("/api/tickets/{ticket_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["Tickets"])
+def delete_ticket(ticket_id: str, db: Session = Depends(get_db)):
+    """Delete a ticket and its internal notes."""
+    db_ticket = db.query(models.Ticket).filter(models.Ticket.id == ticket_id).first()
+    if not db_ticket:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Ticket with ID '{ticket_id}' not found.",
+        )
+
+    # Notes reference the ticket through a foreign key, so remove them first.
+    db.query(models.Note).filter(models.Note.ticket_id == ticket_id).delete(
+        synchronize_session=False
+    )
+    db.delete(db_ticket)
+    db.commit()
