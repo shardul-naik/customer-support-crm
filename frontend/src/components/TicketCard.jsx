@@ -2,10 +2,16 @@ import React from 'react';
 import { Clock, MessageSquare, User } from 'lucide-react';
 
 export default function TicketCard({ ticket, onSelectTicket }) {
-    // Format SLA deadline remaining time
+    // Format SLA deadline remaining time with UTC handling
     const getSlaStatus = (deadlineStr) => {
         if (!deadlineStr) return null;
-        const deadline = new Date(deadlineStr);
+
+        // Force ISO string to be treated as UTC if missing timezone offset
+        const formattedStr = deadlineStr.endsWith('Z') || deadlineStr.includes('+')
+            ? deadlineStr
+            : `${deadlineStr}Z`;
+
+        const deadline = new Date(formattedStr);
         const now = new Date();
         const diffMs = deadline - now;
 
