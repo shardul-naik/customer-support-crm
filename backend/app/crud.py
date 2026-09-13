@@ -65,7 +65,7 @@ def update_ticket(
 
     new_status = update_data.status
     if new_status is not None:
-        db_ticket.status = new_status
+        setattr(db_ticket, "status", new_status)
 
     if update_data.note_text:
         note_id = f"NOTE-{uuid.uuid4().hex[:8].upper()}"
